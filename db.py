@@ -1,48 +1,54 @@
 import sqlite3
 
-''' Starting database '''
-con = sqlite3.connect('fridge.db')
-cur = con.cursor()
-cur.execute('SELECT SQLITE_VERSION()')
-data = cur.fetchone()
-print(data)
+class Items:
+    def __init__(self, database_name="fridge.db"):
+        ''' Starting database '''
+        self.con = sqlite3.connect(database_name)
+        self.cur = self.con.cursor()
+        try:
+            self.create_items_table()
+        except:
+            print("Table already exists")
 
+    def create_items_table(self):
+        self.cur.execute('''CREATE TABLE items (name varchar(100) PRIMARY KEY, fridge Boolean, grocery Boolean, last_updated date, quantity int)''')
 
-def start_db():
-    cur.execute('''CREATE TABLE items (name varchar(100) PRIMARY KEY, fridge Boolean, grocery Boolean, last_updated date, quantity int)''')
+    def add_item(self, name, fridge, grocery, date, quantity):
+        self.cur.execute("INSERT INTO items VALUES (?, ?, ?, ?, ?)",(name, fridge, grocery, date, quantity))
+        self.con.commit()
 
+    def get_all_items(self):
+        self.cur.execute('SELECT * FROM items')
+        items = self.cur.fetchall()
+        return items
 
-def add_item(name, fridge, grocery, date, quantity):
-    cur.execute("INSERT INTO items VALUES (?, ?, ?, ?, ?)",(name, fridge, grocery, date, quantity))
-    con.commit()
+    def get_fridge_items(self):
+        self.cur.execute('SELECT * FROM items WHERE fridge = 1')
+        fridge_items = self.cur.fetchall()
+        return fridge_items
 
+    def get_grocery_items(self):
+        self.cur.execute('SELECT * FROM items WHERE grocery = 1')
+        grocery_items = self.cur.fetchall()
+        return grocery_items
 
-def get_all_items():
-    cur.execute('SELECT * FROM items')
-    items = cur.fetchall()
-    print(items)
+    def update_quantity(self, name, new_quantity):
+        self.cur.execute('UPDATE items SET quantity=? WHERE name = ?', (new_quantity, name))
+        self.con.commit()
 
-def get_fridge_items():
-    cur.execute('SELECT * FROM items WHERE fridge = TRUE')
-    fridge_items = cur.fetchall()
-    print(fridge_items)
+    def delete_item(self, name):
+        self.cur.execute('DELETE FROM items WHERE name = ?', (name,))
+        self.con.commit()
 
-def get_grocery_items():
-    cur.execute('SELECT * FROM items WHERE grocery = TRUE')
-    grocery_items = cur.fetchall()
-    print(grocery_items)
+    def close_db(self):
+        self.con.close()
 
-def update_quantity(name, new_quantity):
-    cur.execute('UPDATE items SET quantity=? WHERE name = ?', (name, new_quantity))
-    con.commit()
-
-def delete_item(name):
-    cur.execute('DELETE FROM items WHERE name = ?', name)
-    con.commit()
-
-
-# add_item(name='apples', fridge=True, grocery=False, date='2015-07-20', quantity=5)
-
-get_all_items()
-
-con.close()
+if __name__ == "__main__":
+    our_fridge = Items()
+    our_fridge.add_item(name="tomato", fridge=1, grocery=0, date='2015-07-20', quantity=3)
+    our_fridge.get_fridge_items()
+    our_fridge.get_grocery_items()
+    our_fridge.update_quantity(name="tomato", new_quantity=100)
+    our_fridge.get_all_items()
+    our_fridge.delete_item(name="tomato")
+    our_fridge.get_all_items()
