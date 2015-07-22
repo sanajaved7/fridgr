@@ -22,6 +22,10 @@ class Items:
         items = self.cur.fetchall()
         return items
 
+    def get_one_item(self, name):
+        self.cur.execute('SELECT * FROM items WHERE name = ?', (name,))
+        return self.cur.fetchone()
+
     def get_fridge_items(self):
         self.cur.execute('SELECT * FROM items WHERE fridge = 1')
         fridge_items = self.cur.fetchall()
