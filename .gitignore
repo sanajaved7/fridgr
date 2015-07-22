@@ -1,1 +1,2 @@
-fridge.db
+*.db
+__pycache__

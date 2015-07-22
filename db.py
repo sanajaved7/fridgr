@@ -45,10 +45,7 @@ class Items:
 
 if __name__ == "__main__":
     our_fridge = Items()
-    our_fridge.add_item(name="tomato", fridge=1, grocery=0, date='2015-07-20', quantity=3)
+    our_fridge.add_item(name="banana", fridge=1, grocery=0, date='2015-07-20', quantity=3)
     our_fridge.get_fridge_items()
     our_fridge.get_grocery_items()
-    our_fridge.update_quantity(name="tomato", new_quantity=100)
-    our_fridge.get_all_items()
-    our_fridge.delete_item(name="tomato")
     our_fridge.get_all_items()
