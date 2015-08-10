@@ -10,14 +10,12 @@ class Items:
         except:
             print("Table already exists")
 
-    def format_item(self):
-    """Given database item list returns dictionary compatible with json"""
     def create_items_table(self):
         self.cur.execute('''CREATE TABLE items (name varchar(100) PRIMARY KEY, fridge Boolean, grocery Boolean, last_updated date, quantity int)''')
 
-   @staticmethod
-   def row_to_dict(db_row):
-    """Converts database row to dictionary """
+    @staticmethod
+    def row_to_dict(db_row):
+        """Converts database row to dictionary """
         return {
             'name': db_row[0],
             'fridge': db_row[1],
@@ -53,6 +51,9 @@ class Items:
     def update_quantity(self, name, new_quantity):
         self.cur.execute('UPDATE items SET quantity=? WHERE name = ?', (new_quantity, name))
         self.con.commit()
+
+    def update_location(self, name, fridge, grocery):
+        self.cur.execute('UPDATE items SET fridge = ?, grocery = ? WHERE name = ?', (fridge, grocery, name))
 
     def delete_item(self, name):
         self.cur.execute('DELETE FROM items WHERE name = ?', (name,))

@@ -19,7 +19,7 @@ def fridge():
         for row in our_fridge.get_fridge_items():
             fridge_list.append(our_fridge.row_to_dict(row))
         return jsonify({"fridge": fridge_list})
-    elif request.method = 'POST':
+    elif request.method == 'POST':
         name = request.form['name'],
         quantity = request.form['quantity']
         our_fridge.add_item(name=name, fridge=1, grocery=0, date=datetime.date.today(), quantity=quantity)
@@ -39,7 +39,7 @@ def grocery():
         our_fridge.add_item(name=name, fridge=0, grocery=1, date=datetime.date.today(), quantity=quantity)
 
 
-@app.route("/items/<name>", methods=['GET', 'DELETE'])
+@app.route("/items/<name>", methods=['GET', 'DELETE', 'POST'])
 def fridge_item(name):
     """Returns one item info from the fridge"""
     if request.method == 'GET':
@@ -47,8 +47,11 @@ def fridge_item(name):
         return jsonify(our_fridge.row_to_dict(row))
     elif request.method == 'DELETE':
         our_fridge.delete_item(name=name)
+    elif request.method == 'POST':
+        fridge = request.form['fridge']
+        grocery = request.form['grocery']
+        our_fridge.update_location(name=name, fridge=fridge, grocery=grocery)
 
-@app.route("")
 
 if __name__ == "__main__":
     app.run()
