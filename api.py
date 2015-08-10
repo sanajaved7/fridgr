@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 
 @app.route("/", methods=['GET'])
-def hello():
-    return "Hello and welcome to your personal fridge app! :D"
+def index():
+    return app.send_static_file('index.html')
 
 @app.route("/fridge", methods=['GET', 'POST'])
 def fridge():
@@ -52,6 +52,10 @@ def fridge_item(name):
         grocery = request.form['grocery']
         our_fridge.update_location(name=name, fridge=fridge, grocery=grocery)
 
+@app.route('/<path:path>')
+def static_proxy(path):
+    """send_static_file will guess the correct MIME type"""
+    return app.send_static_file(path)
 
 if __name__ == "__main__":
     app.run()
