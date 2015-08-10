@@ -10,8 +10,22 @@ class Items:
         except:
             print("Table already exists")
 
+    def format_item(self):
+    """Given database item list returns dictionary compatible with json"""
     def create_items_table(self):
         self.cur.execute('''CREATE TABLE items (name varchar(100) PRIMARY KEY, fridge Boolean, grocery Boolean, last_updated date, quantity int)''')
+
+   @staticmethod
+   def row_to_dict(db_row):
+    """Converts database row to dictionary """
+        return {
+            'name': db_row[0],
+            'fridge': db_row[1],
+            'grocery': db_row[2],
+            'date': db_row[3],
+            'quantity': db_row[4]
+        }
+
 
     def add_item(self, name, fridge, grocery, date, quantity):
         self.cur.execute("INSERT INTO items VALUES (?, ?, ?, ?, ?)",(name, fridge, grocery, date, quantity))
