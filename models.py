@@ -8,6 +8,7 @@ class Family(db.Model):
     name = db.Column(db.String, nullable=False)
     members = db.relationship("User", backref="family")
     fridge = db.relationship("Fridge", uselist=False, backref="family")
+    grocery = db.relationship("Grocery", backref="family")
 
 
 class User(db.Model):
@@ -49,6 +50,7 @@ class Grocery(db.Model):
 
     grocery_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
+    family_id = db.Column(db.Integer, ForeignKey('family.family_id'))
 
     def __init__(self, name):
         self.name = name
