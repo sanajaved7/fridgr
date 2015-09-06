@@ -21,12 +21,11 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
-    family_id = db.Column(db.Integer, ForeignKey('family.family_id'))
+    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id', nullable=True))
 
-    def __init__(self, name, password, family_id):
+    def __init__(self, name, password):
         self.name = name
         self.password = password
-        self.family_id = family_id
 
 
 
@@ -51,7 +50,7 @@ class Fridge(db.Model):
 
     fridge_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-    family_id = db.Column(db.Integer, ForeignKey('family.family_id'))
+    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id'))
     items = db.relationship("Items", backref="fridge")
 
     def __init__(self, name, family_id):
