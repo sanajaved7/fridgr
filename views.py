@@ -1,8 +1,6 @@
 from flask import Flask, jsonify, request
-from models import Items
 import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
-our_fridge = Items()
 
 
 app = Flask(__name__)
