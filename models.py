@@ -1,71 +1,59 @@
 from views import db
 from datetime import datetime
 
-class Family(db.Model):
-    __tablename__ = "family"
 
-    family_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    members = db.relationship("User", backref="family")
-    fridge = db.relationship("Fridge", uselist=False, backref="family")
-    grocery = db.relationship("Grocery", backref="family")
-
-    def __init__(self, name, members):
-        self.name = name
-        self.members = members
+user_identifier = db.Table(
+    'user_identifier',
+    db.Column('family_id', db.Integer, db.ForeignKey('family.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+)
 
 
 class User(db.Model):
     __tablename__ = "users"
 
-    user_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id', nullable=True))
-
-    def __init__(self, name, password):
-        self.name = name
-        self.password = password
+    email = db.Column(db.String, nullable=False, unique=True)
+    family_id = db.Column(db.Integer, db.ForeignKey('family.id'),  nullable=True)
 
 
-
-class Items(db.Model):
-    __tablename__ = "items"
-
-    item_id = db.Column(db.Integer, primary_key=True)
+class Family(db.Model):
+    __tablename__ = "family"
+    
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    date_bought = db.Column(db.Date, nullable=False)
-    fridge_id = db.Column(db.Integer, db.ForeignKey('fridge.fridge_id'))
-    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.grocery_id'))
-
-    def __init__(self, name, quantity, date_bought):
-        self.name = name
-        self.quantity = quantity
-        self.date_bought = date_bought
-
+    members = db.relationship("User", secondary=user_identifier, backref="family")
+    fridge = db.relationship("Fridge", uselist=False, backref="family")
+    grocery = db.relationship("Grocery", backref="family")
+    
 
 class Fridge(db.Model):
     __tablename__ = "fridge"
 
-    fridge_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id'))
     items = db.relationship("Items", backref="fridge")
-
-    def __init__(self, name, family_id):
-        self.name = name
-        self.family_id = family_id
+    family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
 
 
 class Grocery(db.Model):
     __tablename__ = "grocery"
 
-    grocery_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id'))
     items = db.relationship("Items", backref="grocery")
+    family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
 
-    def __init__(self, name, family_id, items):
-        self.name = name
-        self.family_id = family_id
+
+class Items(db.Model):
+    __tablename__ = "items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    date_bought = db.Column(db.Date, nullable=False)
+    fridge_id = db.Column(db.Integer, db.ForeignKey('fridge.id'))
+    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'))
+
+
