@@ -2,58 +2,63 @@ from views import db
 from datetime import datetime
 
 
-user_identifier = db.Table(
-    'user_identifier',
-    db.Column('family_id', db.Integer, db.ForeignKey('family.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+user_pkentifier = db.Table(
+    'user_pkentifier',
+    db.Column('family_pk', db.Integer, db.ForeignKey('family.pk')),
+    db.Column('user_pk', db.Integer, db.ForeignKey('users.pk')),
 )
 
 
 class User(db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
+    pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.id'),  nullable=True)
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'),  nullable=True)
 
 
 class Family(db.Model):
     __tablename__ = "family"
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    members = db.relationship("User", secondary=user_identifier, backref="family")
+
+    pk = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    members = db.relationship("User", secondary=user_pkentifier, backref="family")
     fridge = db.relationship("Fridge", uselist=False, backref="family")
-    grocery = db.relationship("Grocery", backref="family")
-    
+    grocery_lists = db.relationship("GroceryList", backref="family")
+
 
 class Fridge(db.Model):
     __tablename__ = "fridge"
 
-    id = db.Column(db.Integer, primary_key=True)
+    pk = db.Column(db.Integer, primary_key=True)
+    items = db.relationship("Item", backref="fridge")
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
+
+
+class GroceryList(db.Model):
+    __tablename__ = "grocery_list"
+
+    pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-    items = db.relationship("Items", backref="fridge")
-    family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
+    items = db.relationship("Item", backref="grocery_list")
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
 
+    __table_args__ = (
+        db.UniqueConstraint('name', 'family_pk', name='_name_family_pk'),
+    )
 
-class Grocery(db.Model):
-    __tablename__ = "grocery"
+class Item(db.Model):
+    __tablename__ = "item"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
-    items = db.relationship("Items", backref="grocery")
-    family_id = db.Column(db.Integer, db.ForeignKey('family.id'))
-
-
-class Items(db.Model):
-    __tablename__ = "items"
-
-    id = db.Column(db.Integer, primary_key=True)
+    pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    date_bought = db.Column(db.Date, nullable=False)
-    fridge_id = db.Column(db.Integer, db.ForeignKey('fridge.id'))
-    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'))
+    quantity = db.Column(db.Integer)
+    date_bought = db.Column(db.Date)
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'), nullable=False)
+    fridge_pk = db.Column(db.Integer, db.ForeignKey('fridge.pk'))
+    grocery_pk = db.Column(db.Integer, db.ForeignKey('grocery_list.pk'))
 
-
+    __table_args__ = (
+        db.UniqueConstraint('name', 'family_pk', name='_name_family_pk'),
+    )
