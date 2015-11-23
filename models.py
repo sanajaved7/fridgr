@@ -28,26 +28,6 @@ class Family(db.Model):
     grocery_lists = db.relationship("GroceryList", backref="family")
 
 
-class Fridge(db.Model):
-    __tablename__ = "fridge"
-
-    pk = db.Column(db.Integer, primary_key=True)
-    items = db.relationship("Item", backref="fridge")
-    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
-
-
-class GroceryList(db.Model):
-    __tablename__ = "grocery_list"
-
-    pk = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
-    items = db.relationship("Item", backref="grocery_list")
-    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
-
-    __table_args__ = (
-        db.UniqueConstraint('name', 'family_pk', name='_name_family_pk'),
-    )
-
 class Item(db.Model):
     __tablename__ = "item"
 
@@ -56,8 +36,60 @@ class Item(db.Model):
     quantity = db.Column(db.Integer)
     date_bought = db.Column(db.Date)
     family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'), nullable=False)
-    fridge_pk = db.Column(db.Integer, db.ForeignKey('fridge.pk'))
-    grocery_pk = db.Column(db.Integer, db.ForeignKey('grocery_list.pk'))
+
+    discriminator = db.Column(db.String)
+    parent_id = db.Column(db.Integer)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'family_pk', name='_name_family_pk'),
+    )
+
+    @property
+    def parent(self):
+        """Provides in-Python access to the "parent" by choosing
+        the appropriate relationship. """
+        return getattr(self, "parent_%s" % self.discriminator)
+
+
+class HasItems(object):
+    """IsInList mixin, creates a relationship to
+    the items_association table for each parent.
+    http://docs.sqlalchemy.org/en/rel_1_0/_modules/examples/generic_associations/generic_fk.html
+     """
+
+
+@db.event.listens_for(HasItems, "mapper_configured", propagate=True)
+def setup_listener(mapper, class_):
+    name = class_.__name__
+    discriminator = name.lower()
+    class_.items = db.relationship(Item,
+        primaryjoin=db.and_(
+            class_.pk == db.foreign(db.remote(Item.parent_id)),
+            Item.discriminator == discriminator
+        ),
+        backref=db.backref(
+                "parent_%s" % discriminator,
+                primaryjoin=db.remote(class_.pk) == db.foreign(Item.parent_id)
+                )
+        )
+    @db.event.listens_for(class_.items, "append")
+    def append_address(target, value, initiator):
+        value.discriminator = discriminator
+
+
+class Fridge(HasItems, db.Model):
+    __tablename__ = "fridge"
+
+    pk = db.Column(db.Integer, primary_key=True)
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
+
+
+class GroceryList(HasItems, db.Model):
+    __tablename__ = "grocery_list"
+
+    pk = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    family_pk = db.Column(db.Integer, db.ForeignKey('family.pk'))
 
     __table_args__ = (
         db.UniqueConstraint('name', 'family_pk', name='_name_family_pk'),

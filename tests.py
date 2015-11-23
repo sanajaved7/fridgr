@@ -44,7 +44,6 @@ class MyTest(TestCase):
         family.grocery_lists.append(grocery_list)
         family2.grocery_lists.append(grocery_list2)
         db.session.commit()
-        """
         # Adding items
         item1 = Item(name="item1", family_pk=family.pk)
         item2 = Item(name="item2", family_pk=family.pk)
@@ -56,17 +55,15 @@ class MyTest(TestCase):
         db.session.add(item3)
         db.session.add(item4)
         db.session.add(item5)
-        # Adding items to grocery lists  
-        grocery_list.items.append(item1)
-        grocery_list.items.append(item2)
-        grocery_list.items.append(item3)
-        grocery_list2.items.append(item4)
-        grocery_list2.items.append(item5)
         # Adding items to fridge
         fridge.items.append(item1)
         fridge2.items.append(item2)
+        # Adding items to grocery lists
+        grocery_list.items.append(item3)
+        grocery_list2.items.append(item4)
+        grocery_list2.items.append(item5)
         db.session.commit()
-        """
+
 
     def tearDown(self):
         db.session.remove()
@@ -94,6 +91,7 @@ class MyTest(TestCase):
         user = db.session.query(User).filter(User.name=="user1").one()
         self.assertEqual(len(user.family), 2)
 
+    def test_
 
 if __name__ == "__main__":
     unittest.main()
