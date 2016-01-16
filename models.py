@@ -21,7 +21,7 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id', nullable=True))
+    family_id = db.Column(db.Integer, db.ForeignKey('family.family_id'), nullable=True)
 
     def __init__(self, name, password):
         self.name = name
